@@ -67,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   mainAxisSpacing: 10,
                   children: List.generate(provider.photos.length, (index) {
                     final photo = provider.photos[index];
-                    final aspectRatio = photo.height / photo.width;
+                    // final aspectRatio = photo.height / photo.width;
 
                     return GestureDetector(
                       onTap: () async {
