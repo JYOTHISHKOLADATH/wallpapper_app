@@ -28,10 +28,11 @@ class _HomeScreenState extends State<HomeScreen> {
         _scrollController.position.maxScrollExtent) {
       final provider = Provider.of<WallpaperProvider>(context, listen: false);
       if (!provider.isLoading) {
-        provider.loadMorePhotos();
+        provider.loadPhotos();
       }
     }
   }
+
 
   @override
   void dispose() {
@@ -57,43 +58,75 @@ class _HomeScreenState extends State<HomeScreen> {
           } else if (provider.photos.isEmpty) {
             return const Center(child: Text('No photos found'));
           } else {
-            return Padding(
-              padding: const EdgeInsets.all(10),
-              child: SingleChildScrollView(
-                controller: _scrollController,
-                child: StaggeredGrid.count(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                  children: List.generate(provider.photos.length, (index) {
-                    final photo = provider.photos[index];
-                    // final aspectRatio = photo.height / photo.width;
-
-                    return GestureDetector(
-                      onTap: () async {
-
-                        String url = photo.urls.small;
-                        final tempDir = await getTemporaryDirectory();
-                        final path = "${tempDir.path}/myfile.jpg";
-                        await Dio().download(url, path);
-                        await GallerySaver.saveImage(path,
-                            albumName: "Wallpaper App");
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Image Downloaded to Gallery!')));
-
-                      },
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10.0),
-                        child: FadeInImage.assetNetwork(
-                          placeholder: 'assets/placeholder.png',
-                          image: photo.urls.small,
-                          fit: BoxFit.cover,
+            return SingleChildScrollView(
+              controller: _scrollController,
+              child: Column(
+                children: [
+                  if (provider.bannerPhoto != null)
+                    Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: GestureDetector(
+                        onTap: () async {
+                          final photo = provider.bannerPhoto!;
+                          String url = photo.urls.small;
+                          final tempDir = await getTemporaryDirectory();
+                          final path = "${tempDir.path}/myfile.jpg";
+                          await Dio().download(url, path);
+                          await GallerySaver.saveImage(path,
+                              albumName: "Wallpaper App");
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content:
+                                  Text('Image Downloaded to Gallery!')));
+                        },
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10.0),
+                          child: FadeInImage.assetNetwork(
+                            placeholder: 'assets/placeholder.png',
+                            image: provider.bannerPhoto!.urls.small,
+                            fit: BoxFit.cover,
+                            height: 200,
+                            width: double.infinity,
+                          ),
                         ),
                       ),
-                    );
-                  }),
-                ),
+                    ),
+
+                  Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: StaggeredGrid.count(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                      children: List.generate(provider.photos.length, (index) {
+                        final photo = provider.photos[index];
+
+                        return GestureDetector(
+                          onTap: () async {
+                            String url = photo.urls.small;
+                            final tempDir = await getTemporaryDirectory();
+                            final path = "${tempDir.path}/myfile.jpg";
+                            await Dio().download(url, path);
+                            await GallerySaver.saveImage(path,
+                                albumName: "Wallpaper App");
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text(
+                                        'Image Downloaded to Gallery!')));
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10.0),
+                            child: FadeInImage.assetNetwork(
+                              placeholder: 'assets/placeholder.png',
+                              image: photo.urls.small,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                ],
               ),
             );
           }
